@@ -148,7 +148,7 @@
         }
 
         .progress-step.completed .step-label {
-            color: var(--success-color);
+            color: var (--success-color);
         }
 
         textarea, input, button {
@@ -940,6 +940,131 @@
             visibility: visible;
             margin-right: 10px;
         }
+
+        .email-section {
+            background: var(--card-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+
+        .section-title {
+            background: var(--primary-color);
+            color: white;
+            margin: 0;
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .email-generator {
+            padding: 1.5rem;
+        }
+
+        .email-output {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .email-header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .email-field {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .email-body {
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .placeholder {
+            font-style: italic;
+            color: var(--muted-color);
+        }
+
+        .email-achievements {
+            background: #f8fafc;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .email-achievements h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+        }
+
+        .email-achievements ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .email-signature {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .email-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .action-btn.secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .action-btn.edit {
+            background: #f8fafc;
+            color: var(--text-color);
+            border: 1px solid #e2e8f0;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .email-actions {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js" integrity="sha512-ml/QKfG3+Yes6TwOzQb7aCNtJF4PUyha6R3w8pSTo/VJSywl7ZreYvvtUso7fKevpsI+pYVVwnu82YO0q3V6eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
@@ -1298,16 +1423,38 @@
         
         <!-- Add this section inside the preview-section div, after the interview-prep-section -->
         <div class="email-section">
-            <h2 class="interview-section-title">Outreach Email</h2>
-            <div id="emailOutput" class="email-output">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
+            <h2 class="section-title">Professional Outreach Email</h2>
+            <div class="email-generator">
+                <div id="emailOutput" class="email-output">
+                    <div class="email-header">
+                        <div class="email-field"><strong>Subject:</strong> <span class="placeholder">[Position] Opportunity at [Company]</span></div>
+                        <div class="email-field"><strong>To:</strong> <span class="placeholder">[Hiring Manager's Name]</span></div>
+                    </div>
+                    <div class="email-body">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                    <div class="email-achievements">
+                        <h4>Key Achievements & Skills</h4>
+                        <ul id="emailAchievements"></ul>
+                    </div>
+                    <div class="email-signature">
+                        <strong>Best regards,</strong><br>
+                        <span class="placeholder">[Your Name]</span>
+                    </div>
                 </div>
-            </div>
-            <div class="button-group">
-                <button class="nav-btn" onclick="regenerateEmail()">Regenerate Email</button>
-                <button class="nav-btn" onclick="copyEmail()">Copy Email</button>
-                <button class="nav-btn" onclick="toggleEdit('emailOutput')">Edit Email</button>
+                <div class="email-actions">
+                    <button class="action-btn primary" onclick="copyEmail()">
+                        <i class="fas fa-copy"></i> Copy Email
+                    </button>
+                    <button class="action-btn secondary" onclick="regenerateEmail()">
+                        <i class="fas fa-redo"></i> Regenerate
+                    </button>
+                    <button class="action-btn edit" onclick="toggleEdit('emailOutput')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -1899,6 +2046,7 @@ Please generate a professionally formatted cover letter that follows traditional
 
         async function generateEmail() {
             const emailOutput = document.getElementById('emailOutput');
+            const achievementsList = document.getElementById('emailAchievements');
             emailOutput.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
 
             try {
@@ -1912,20 +2060,46 @@ Please generate a professionally formatted cover letter that follows traditional
                         model: "deepseek-chat",
                         messages: [{
                             role: "user",
-                            content: `Generate a professional outreach email based on this job description and CV. The email should:
-                            // ...existing prompt...`
+                            content: `Generate a professional outreach email for a job application. Use this format:
+
+Requirements:
+1. Create a compelling subject line
+2. Professional greeting with [Hiring Manager's Name] placeholder
+3. Strong opening paragraph mentioning the specific role and company
+4. 2-3 brief body paragraphs highlighting relevant experience
+5. Closing paragraph with clear call to action
+6. Professional signature
+7. List 3-4 key achievements/skills that match the job
+
+Use these specific details:
+Job Description: ${jobDescription}
+CV Content: ${cvContent}
+
+Format the email using these HTML elements:
+- <div class="email-header"> for subject and recipient
+- <div class="email-body"> for main content
+- <div class="email-achievements"> for key achievements
+- <div class="email-signature"> for signature
+- Use <span class="placeholder"> for placeholder text
+- Use <strong> for emphasis
+- Use bullet points for achievements
+
+Make it professional, engaging, and specifically tailored to the role.`
                         }],
                         temperature: 0.7,
                         max_tokens: 1000
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to generate email content');
-                }
-
+                if (!response.ok) throw new Error('Failed to generate email');
+                
                 const data = await response.json();
                 emailOutput.innerHTML = data.choices[0].message.content;
+                
+                // Enhance appearance after generation
+                document.querySelectorAll('.placeholder').forEach(el => {
+                    el.style.color = 'var(--muted-color)';
+                });
             } catch (error) {
                 console.error('Error:', error);
                 emailOutput.innerHTML = 'Error generating email: ' + error.message;
