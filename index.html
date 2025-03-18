@@ -1147,6 +1147,43 @@
             padding-top: 1.5rem;
             border-top: 1px solid #e2e8f0;
         }
+
+        .answer-card .answer {
+            line-height: 1.8;
+            color: var(--text-color);
+        }
+
+        .answer-card .highlight {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .answer-card .key-point {
+            font-weight: 600;
+        }
+
+        .answer-card .question {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .answer-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .answer-card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            transform: translateY(-1px);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js" integrity="sha512-ml/QKfG3+Yes6TwOzQb7aCNtJF4PUyha6R3w8pSTo/VJSywl7ZreYvvtUso7fKevpsI+pYVVwnu82YO0q3V6eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
@@ -2559,7 +2596,7 @@ Make it professional, engaging, and specifically tailored to the role.`
                 answerCard.className = 'answer-card';
                 answerCard.innerHTML = `
                     <div class="question">${question}</div>
-                    <div class="answer">${answer}</div>
+                    <div class="answer">${formatAnswer(answer)}</div>
                     <div class="actions">
                         <button class="nav-btn" onclick="toggleAnswerEdit(this)">Edit</button>
                         <button class="nav-btn" onclick="copyAnswer(this)">Copy</button>
@@ -2607,6 +2644,19 @@ Make it professional, engaging, and specifically tailored to the role.`
                 })
                 .catch(err => console.error('Failed to copy:', err));
         }
+
+        const formatAnswer = (text) => {
+            return text
+                // Format company/role names
+                .replace(/([A-Z][A-Za-z\s&]+(?:Company|Team|Line|Intern|Hand|Dispenser))/g, '<span class="highlight">$1</span>')
+                // Format technical terms and skills
+                .replace(/(?:3D|BIM|IT|MEP)\s+(?:modeling|software|elements|projects)/g, '<span class="key-point">$&</span>')
+                // Format percentages and metrics
+                .replace(/(\d+%|\d+\s*(?:increase|decrease|improvement))/g, '<span class="key-point">$1</span>')
+                // Format key skills and technologies
+                .replace(/(?:communication|teamwork|problem-solving|sustainability|innovative design|energy modeling|efficiency)/g, 
+                        '<span class="highlight">$&</span>');
+        };
     </script>
     <script type="module">
         import { signUp, login, logout, initializeAuth } from './firebaseAuth.js';
