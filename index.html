@@ -12,6 +12,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+<script>
+  // Check if the user is logged in using Firebase
+  function isLoggedIn() {
+    return firebase.auth().currentUser !== null;
+  }
+
+</script>
     <nav class="sidebar">
         <button class="toggle-btn">
             <i class="fas fa-chevron-left"></i>
@@ -133,7 +140,9 @@
 
         // Check auth state and fetch user data
         auth.onAuthStateChanged((user) => {
-            if (user) {
+            if (!user) {
+                window.location.href = 'auth.html';
+            } else {
                 db.collection('users').doc(user.uid).get()
                 .then((doc) => {
                     if (doc.exists) {
@@ -153,7 +162,7 @@
             }
         });
 
-        // Sidebar toggle functionality
+         // Sidebar toggle functionality
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
         const toggleBtn = document.querySelector('.toggle-btn');
