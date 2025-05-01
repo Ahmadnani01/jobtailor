@@ -6,156 +6,134 @@
     <title>Region Management - JobSeeker</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="styles/main.css" rel="stylesheet">
-    <!-- Leaflet CSS for map -->
     <style>
+        /* Enhanced Apple-inspired styles for region section */
+        #degree-search-section,
+        .search-filter-container,
+        #map,
+        #saved-companies,
+        #saved-locations {
+            background-color: #f0f0f0; /* Slightly darker, premium feel */
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+            padding: 24px;
+            margin-bottom: 24px;
+            font-family: "SF Pro Display", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .search-bar input[type="text"],
+        #industry-filter {
+            border: none; /* Remove border */
+            border-radius: 12px; /* Slightly more rounded */
+            padding: 12px 16px; /* Adjust padding */
+            font-size: 16px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15); /* Refine inner shadow */
+            transition: box-shadow 0.3s ease; /* Smooth transition */
+            background-color: #ffffff; /* Pure white background */
+            color: #222; /* Even darker text */
+        }
+
+        .search-bar input[type="text"]:focus,
+        #industry-filter:focus {
+            outline: none;
+            box-shadow: 0 4px 9px rgba(0, 0, 0, 0.25); /* Even more enhanced shadow on focus */
+        }
+
+        .search-bar button,
+        #add-industry-button,
+        .industry-suggestion-button,
+        #live-location-button,
+        #degree-search-button {
+            background-color: #29abe2; /* A lighter, more premium blue */
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .search-bar button:hover,
+        #add-industry-button:hover,
+        .industry-suggestion-button:hover,
+        #live-location-button:hover,
+        #degree-search-button:hover {
+            background-color: #0062cc;
+            transform: scale(1.05);
+        }
+
+        #saved-companies .job-card,
+        #saved-locations .job-card {
+            background-color: #f9f9f9; /* Use the same background as the sections */
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        #saved-companies .job-card:hover,
+        #saved-locations .job-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #saved-companies h3,
+        #saved-locations h3 {
+            color: #222;
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+
+        #saved-companies p,
+        #saved-locations p {
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        /* Styles for the degree search section */
         #degree-search-section {
-            background-color: #cce5ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
-        .search-filter-container {
-            margin-bottom: 25px;
-        }
-
-        #map {
-            border: 1px solid #87CEEB;
-            border-radius: 8px;
-            height: 400px;
+        #degree-search-input {
+            margin-bottom: 10px;
             width: 100%;
         }
 
-        /* Styles for loading indicator and confirmation message */
-        #autofill-loading {
+        #degree-search-suggestions {
             display: flex;
-            align-items: center;
-            color: #555;
+            flex-wrap: wrap;
+            gap: 5px;
         }
 
-        #autofill-loading i {
-            margin-right: 5px;
-        }
-
-        #autofill-status {
-            display: flex;
-            align-items: center;
-            color: green;
-        }
-
-        #autofill-status i {
-            margin-right: 5px;
-        }
-
-        .industry-list {
-            margin-top: 20px;
-        }
-
-        .industry-item {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        .industry-item h3 {
-            margin-top: 0;
-        }
-
-        .search-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .search-bar{
+        /* Styles for applied filters */
+        #applied-filters {
             display: flex;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
-        .search-container input[type="text"] {
-            flex-grow: 1;
-            margin-right: 10px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        /* Styles for industry suggestions */
+        #industry-suggestions-container {
+            margin-bottom: 20px;
         }
 
-        .search-container button {
-            padding: 8px 15px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        #industry-filter {
-             margin-bottom: 20px;
-            width: 300px;
-        }
-
-        /* Degree Search Section Styles */
-        #degree-search-section {
-            background-color: #f0f8ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Search Filter Container Styles */
-        .search-filter-container {
-            margin-bottom: 15px;
-        }
-
-        /* Map Styles */
-        #map {
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            height: 400px;
-            width: 100%;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Industry Suggestion Button Styles */
         .industry-suggestion-button {
-            background-color: #5dade2;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-            margin-right: 5px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
+            margin: 5px;
         }
 
-        .industry-suggestion-button:hover {
-            background-color: #0056b3;
-        }
-
-        /* Search Bar Styles */
-        .search-bar input[type="text"] {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 5px;
-        }
-
-        .search-bar button {
-            padding: 8px 15px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .search-bar button:hover {
-            background-color: #1e7e34;
+        /* Styles for live location button */
+        #live-location-button {
+            margin-top: 10px;
         }
     </style>
 </head>
+
 <body>
     <nav class="sidebar">
         <button class="toggle-btn">
@@ -727,8 +705,8 @@
                                                          style="width: 100%; border-radius: 4px;" alt="${placeDetail.name}">
                                                 </div>
                                             ` : ''}
-                                        </div>
-                                        <div style="padding: 15px; border-top: 1px solid #eee;">
+                                         </div>
+                                         <div style="padding: 0px; border-top: 0px solid #eee;">
                                             <button id="saveLocationBtn" style="
                                                 background: #2ecc71;
                                                 color: white;
@@ -737,6 +715,7 @@
                                                 border-radius: 4px;
                                                 cursor: pointer;
                                                 width: 100%;
+                                                margin-bottom: 15px;
                                             ">Save Location</button>
                                         </div>
                                     `;
