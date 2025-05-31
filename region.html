@@ -140,7 +140,7 @@
             <i class="fas fa-chevron-left"></i>
         </button>
         <div class="logo">
-            <h2>JobSeeker</h2>
+            <img src="tinywow_change_bg_photo_79922413 (1).png" alt="CVTailor.CC" style="width: 150px; height: auto;">
         </div>
         <ul class="nav-links" >
             <li onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>Home</span></li>
@@ -148,16 +148,21 @@
             <li class="active"><i class="fas fa-globe"></i><span>Region</span></li>
             <li onclick="window.location.href='cv-section.html'"><i class="fas fa-file-alt"></i><span>CV & Cover Letter</span></li>
             <li onclick="window.location.href='job-board.html'"><i class="fas fa-briefcase"></i><span>Job Board</span></li>
-            <li><i class="fas fa-tasks"></i><span>Application Tracker</span></li>
-            <li><i class="fas fa-user"></i><span>Profile</span></li>
-            <li><i class="fas fa-comments"></i><span>Consultation</span></li>
+            <li><i class="fas fa-tasks"></i><span>Application Tracker <span style="color: grey;">(Coming Soon)</span></span></li>
+             <li onclick="window.location.href='profile.html'"><i class="fas fa-user"></i><span>Profile</span></li>
+            <li><i class="fas fa-comments"></i><span>Consultation <span style="color: grey;">(Coming Soon)</span></span></li>
             <li onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></li>
+            <li onclick="window.location.href='plan.html'" class="subscription-plan"><i class="fas fa-credit-card"></i><span>Subscription Plan</span><span id="nav-credit-display" style="font-size: 0.8em; color: #fff; margin-left: 5px;">(Credit: Loading...)</span></li>
         </ul>
     </nav>
 
     <main class="main-content">
         <div class="welcome-section">
             <h1>Region Management</h1>
+            <div id="search-info" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                <p id="search-count-display">Searches: Loading...</p>
+                <p id="credit-display">Credits: Loading...</p>
+            </div>
         </div>
         <div id="degree-search-section">
              <h2>Find your Industry</h2>
@@ -232,6 +237,15 @@
         </div>
     </main>
 
+    <!-- Credit Popup -->
+    <div id="credit-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000; text-align: center;">
+        <h2>Insufficient Credits</h2>
+        <p>You don't have enough credits to perform this search. Please buy more credits or upgrade to premium.</p>
+        <button onclick="window.location.href='plan.html'" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; cursor: pointer;">Go to Subscription Plan</button>
+    </div>
+
+    <div id="popup-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDU5Y7mGd7Eih8fJ9bgK8GesXog9k9qIlw&callback=initMap&libraries=places" defer></script>
     <!-- Firebase Auth -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -255,15 +269,140 @@
         }
         const auth = firebase.auth();
         const db = firebase.firestore();
+        let searchCount = 0;
+
+        // Function to update credit display
+        async function updateCreditDisplay() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists) return;
+
+            const userData = userDoc.data();
+            const isPremium = userData.plan === 'premium';
+            let credits = userData.credits || 0;
+
+            if (isPremium) {
+                credits = 'Unlimited';
+            }
+
+            const creditDisplayElements = document.querySelectorAll('#credit-display');
+            creditDisplayElements.forEach(element => {
+                element.textContent = `Credits: ${credits}`;
+            });
+        }
+
+        // Function to update search count display
+        async function updateSearchCountDisplay() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists) return;
+
+            const userData = userDoc.data();
+            const searchCount = userData.searchCount || 0;
+            const isPremium = userData.plan === 'premium';
+
+            const searchCountDisplay = document.getElementById('search-count-display');
+            if (searchCountDisplay) {
+                if (isPremium) {
+                    searchCountDisplay.textContent = 'Premium: Unlimited searches';
+                } else {
+                    searchCountDisplay.textContent = `Searches: ${searchCount % 3}/3 (2 credits every 3 searches)`;
+
+                    // Show warning if credits are low
+                    if (userData.credits < 2) {
+                        searchCountDisplay.style.color = '#e74c3c';
+                        searchCountDisplay.innerHTML += ' <span style="font-weight:bold">(Low credits!)</span>';
+                    } else {
+                        searchCountDisplay.style.color = '';
+                    }
+                }
+            }
+        }
+        // Function to update credit display in the subscription button
+        async function updateCreditDisplayInButton() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists) return;
+
+            const userData = userDoc.data();
+            const isPremium = userData.plan === 'premium';
+            let credits = userData.credits || 0;
+            const currentPlan = userData.plan || 'free';
+
+            const navCreditDisplay = document.getElementById('credit-display');
+            if (navCreditDisplay) {
+                if (isPremium) {
+                    navCreditDisplay.textContent = 'Premium';
+                } else {
+                    navCreditDisplay.textContent = `(Credit: ${credits})`;
+                }
+            }
+        }
+
+        // Function to update credit display in the subscription button
+        async function updateCreditDisplayInButton(credits) {
+            const navCreditDisplay = document.getElementById('nav-credit-display');
+            if (navCreditDisplay) {
+                const user = auth.currentUser;
+                if (user) {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        const currentPlan = userData.plan || 'free';
+
+                        if (currentPlan === 'premium') {
+                            navCreditDisplay.textContent = 'Premium';
+                        } else {
+                            navCreditDisplay.textContent = `(Credit: ${credits})`;
+                        }
+                    }
+                }
+            }
+        }
 
         // Add auth state listener
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async (user) => {
             if (!user) {
                 window.location.href = 'auth.html';
             } else {
                 loadSavedCompanies(); // Load saved companies once authenticated
+                loadSavedLocations();
+
+                // Listen for changes to the user document
+                db.collection('users').doc(user.uid)
+                    .onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            const credits = userData.credits || 0;
+                            const plan = userData.plan || 'free';
+                            const searchCount = userData.searchCount || 0;
+                            updateCreditDisplayInButton(credits);
+                            updateCreditDisplay();
+                            updateSearchCountDisplay();
+                        }
+                    });
             }
         });
+
+        // Initialize display immediately
+        if (auth.currentUser) {
+            db.collection('users').doc(auth.currentUser.uid).get()
+                .then(userDoc => {
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        const credits = userData.credits || 0;
+                        updateCreditDisplay(credits);
+                        updateCreditDisplayInButton(credits);
+                        updateSearchCountDisplay();
+                    }
+                });
+        }
 
         // Update saveCompany function to check auth
         async function saveCompany(company) {
@@ -638,7 +777,53 @@
             });
             markers = [];
         }
-        function performPlacesSearch(industry) {
+        async function performPlacesSearch(industry) {
+            const user = auth.currentUser;
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            // Get user data
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists) return;
+            
+            const userData = userDoc.data();
+            const isPremium = userData.plan === 'premium';
+            let credits = userData.credits || 0;
+
+            // For free users, check search count and credits
+            if (!isPremium) {
+                if (credits <= 0) {
+                    // Show the popup
+                    document.getElementById('credit-popup').style.display = 'block';
+                    document.getElementById('popup-overlay').style.display = 'block';
+                    return;
+                }
+                // Increment search count
+                const newSearchCount = (userData.searchCount || 0) + 1;
+                await db.collection('users').doc(user.uid).update({
+                    searchCount: newSearchCount
+                });
+                updateSearchCountDisplay();
+
+                // Every 3 searches, deduct 2 credits
+                if (newSearchCount % 3 === 0) {
+                    if (credits < 2) {
+                        alert('Not enough credits! Please purchase more credits to continue searching.');
+                        return;
+                    }
+                    credits -= 2;
+                    await db.collection('users').doc(user.uid).update({
+                        credits: credits
+                    });
+                    updateCreditDisplay(credits);
+                    updateCreditDisplayInButton(credits);
+                    alert(`2 credits deducted. Remaining credits: ${credits}`);
+                }
+            }
+
+            // Perform the actual search
             const bounds = map.getBounds();
             const request = {
                 bounds: bounds,
@@ -1294,6 +1479,15 @@
                     return;
                 }
 
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userData = userDoc.data();
+                const plan = userData.plan || 'free';
+
+                if (plan === 'free' && savedCompanies.length >= 3) {
+                    alert('Free users can only save up to 3 companies. Upgrade to premium for unlimited saves!');
+                    return;
+                }
+
                 // First ensure user document exists
                 await db.collection('users').doc(user.uid).set({
                     email: user.email,
@@ -1336,16 +1530,26 @@
                     return;
                 }
 
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const userData = userDoc.data();
+                const plan = userData.plan || 'free';
+
                 const snapshot = await db.collection('users')
                     .doc(user.uid)
                     .collection('savedCompanies')
                     .orderBy('savedAt', 'desc')
                     .get();
 
-                savedCompanies = snapshot.docs.map(doc => ({
+                let companies = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 }));
+
+                if (plan === 'free') {
+                    savedCompanies = companies.slice(0, 3);
+                } else {
+                    savedCompanies = companies;
+                }
                 
                 displaySavedCompanies();
             } catch (error) {
@@ -1589,6 +1793,7 @@
                                 infoWindow.setContent(content);
                                 infoWindow.open(map, marker);
                                 
+                                
                                 marker.addListener('click', () => {
                                     infoWindow.open(map, marker);
                                 });
@@ -1687,6 +1892,12 @@
                     alert('Geocode was not successful for the following reason: ' + status);
                 }
             });
+        });
+
+        // Function to close the popup when clicking outside
+        document.getElementById('popup-overlay').addEventListener('click', function() {
+            document.getElementById('credit-popup').style.display = 'none';
+            document.getElementById('popup-overlay').style.display = 'none';
         });
     </script>
 </body>
