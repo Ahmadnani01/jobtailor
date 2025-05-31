@@ -969,6 +969,75 @@
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCCoH_alBrRE_LrrE_nR-edbJXqy1pjfCU",
+          authDomain: "quick-test-aac28.firebaseapp.com",
+          projectId: "quick-test-aac28",
+          storageBucket: "quick-test-aac28.firebasestorage.app",
+          messagingSenderId: "892247718936",
+          appId: "1:892247718936:web:e74b78c6897ef081e3d76d",
+          measurementId: "G-0KXC6TQCEE"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.analytics();
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Authentication state listener
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                // User is not logged in, redirect to index.html
+                window.location.href = '/codes/index.html';
+            } else {
+                // User is logged in, load their data
+                loadUserData(user.uid);
+            }
+        });
+
+        async function loadUserData(userId) {
+            db.collection('users').doc(userId).get()
+                .then(async (doc) => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        const currentPlan = userData.plan || 'free';
+
+                        // Update UI with user data
+                        const creditDisplay = document.getElementById('nav-credit-display');
+                        if (creditDisplay) {
+                            if (currentPlan === 'premium') {
+                                creditDisplay.textContent = 'Premium';
+                            } else {
+                                creditDisplay.textContent = `(Credit: ${userData.credits || 0})`;
+                            }
+                        }
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading user data:', error);
+                });
+        }
+
+        function handleLogout() {
+            auth.signOut()
+                .then(() => {
+                    window.location.href = '/codes/index.html';
+                })
+                .catch((error) => {
+                    console.error('Logout error:', error);
+                    alert('Logout failed: ' + error.message);
+                });
+        }
+    </script>
 </head>
 <body>
     <nav class="sidebar">
@@ -976,7 +1045,7 @@
             <i class="fas fa-chevron-left"></i>
         </button>
         <div class="logo">
-            <h2>JobSeeker</h2>
+            <img src="tinywow_change_bg_photo_79922413 (1).png" alt="CVTailor.CC" style="width: 150px; height: auto; margin: 10px 0;">
         </div>
         <ul class="nav-links">
             <li onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>Home</span></li>
@@ -984,10 +1053,11 @@
             <li onclick="window.location.href='region.html'"><i class="fas fa-globe"></i><span>Region</span></li>
             <li class="active"><i class="fas fa-file-alt"></i><span>CV & Cover Letter</span></li>
             <li onclick="window.location.href='job-board.html'"><i class="fas fa-briefcase"></i><span>Job Board</span></li>
-            <li><i class="fas fa-tasks"></i><span>Application Tracker</span></li>
+            <li><i class="fas fa-tasks"></i><span>Application Tracker <span style="color: grey;">(Coming Soon)</span></span></li>
             <li onclick="window.location.href='profile.html'"><i class="fas fa-user"></i><span>Profile</span></li>
-            <li><i class="fas fa-comments"></i><span>Consultation</span></li>
-            <li><i class="fas fa-sign-out-alt"></i><span>Logout</span></li>
+            <li><i class="fas fa-comments"></i><span>Consultation <span style="color: grey;">(Coming Soon)</span></span></li>
+            <li onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></li>
+            <li onclick="window.location.href='plan.html'" class="subscription-plan"><i class="fas fa-credit-card"></i><span>Subscription Plan</span><span id="nav-credit-display" style="font-size: 0.8em; color: #fff; margin-left: 5px;">(Credit: Loading...)</span></li>
         </ul>
     </nav>
 
@@ -1016,7 +1086,7 @@
         <div class="result-section">
             <div class="result-box">
                 <div class="result-header">
-                    <h2>Tailored CV</h2>
+                    <h2>Tailored CV (2 Credits)</h2>
                     <div class="button-group">
                         <button class="btn-edit" onclick="openEditor('cv')">
                             <i class="fas fa-edit"></i>
@@ -1036,7 +1106,7 @@
 
             <div class="result-box">
                 <div class="result-header">
-                    <h2>Cover Letter</h2>
+                    <h2>Cover Letter (2 Credits)</h2>
                     <div class="button-group">
                         <button class="btn-edit" onclick="openEditor('coverLetter')">
                             <i class="fas fa-edit"></i>
@@ -1083,9 +1153,6 @@
             <div class="email-actions">
                 <button class="generate-email-btn" onclick="generateEmail()">
                     <i class="fas fa-magic"></i> Generate Email
-                </button>
-                <button class="regenerate-email-btn" onclick="regenerateEmail()">
-                    <i class="fas fa-redo"></i> Regenerate
                 </button>
                 <button class="copy-email-btn" onclick="copyEmail()">
                     <i class="fas fa-copy"></i> Copy to Clipboard
@@ -1177,6 +1244,15 @@
         </div>
     </div>
 
+    <!-- Credit Popup -->
+    <div id="credit-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000; text-align: center;">
+        <h2>Insufficient Credits</h2>
+        <p>You don't have enough credits to perform this action. Please buy more credits or upgrade to premium.</p>
+        <button onclick="window.location.href='plan.html'" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; cursor: pointer;">Go to Subscription Plan</button>
+    </div>
+
+    <div id="popup-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
     <script>
         // API Configuration
         const API_CONFIG = {
@@ -1262,6 +1338,32 @@
                 return;
             }
 
+            const user = auth.currentUser;
+            if (!user) {
+                alert('User not logged in.');
+                return;
+            }
+
+            const userId = user.uid;
+            
+            // Check user credits
+            const userDoc = await db.collection('users').doc(userId).get();
+            if (!userDoc.exists) {
+                alert('User data not found.');
+                return;
+            }
+
+            const userData = userDoc.data();
+            const isPremium = userData.plan === 'premium';
+            let credits = userData.credits || 0;
+
+            // For free users, check if they have enough credits (4 needed for documents)
+            if (!isPremium && credits < 4) {
+                document.getElementById('credit-popup').style.display = 'block';
+                document.getElementById('popup-overlay').style.display = 'block';
+                return;
+            }
+
             // Show loading state with spinner
             ['cvPreview', 'coverLetterPreview'].forEach(id => {
                 document.getElementById(id).innerHTML = `
@@ -1307,6 +1409,37 @@
                 if (processedDocs.outreachEmail) {
                     sessionStorage.setItem('generatedEmail', processedDocs.outreachEmail);
                 }
+
+                // Check user plan and only deduct credits for free users
+                const creditsToDeduct = 4;
+                const userRef = db.collection('users').doc(userId);
+                const userDoc = await userRef.get();
+                
+                if (userDoc.exists && userDoc.data().plan !== 'premium') {
+                    try {
+                        await db.runTransaction(async (transaction) => {
+                            const sfDoc = await transaction.get(userRef);
+                            if (!sfDoc.exists) {
+                                throw "Document does not exist!";
+                            }
+                            const currentCredits = sfDoc.data().credits || 0;
+                            if (currentCredits < creditsToDeduct) {
+                                throw "Not enough credits. You need 4 credits to generate documents.";
+                            }
+                            transaction.update(userRef, { credits: currentCredits - creditsToDeduct });
+                        });
+                        console.log("Credits successfully deducted for free user!");
+                    } catch (e) {
+                        console.log("Transaction failure: ", e);
+                        alert(e.message || 'Failed to deduct credits. Please try again.');
+                        return;
+                    }
+                } else {
+                    console.log("Skipping credit deduction for premium user");
+                }
+
+                // Refresh credit display after document generation
+                loadUserData(userId);
 
             } catch (error) {
                 console.error('Document Generation Error:', error);
@@ -1481,6 +1614,32 @@
                 return;
             }
 
+            const user = auth.currentUser;
+            if (!user) {
+                alert('User not logged in.');
+                return;
+            }
+
+            const userId = user.uid;
+            const userRef = db.collection('users').doc(userId);
+            const userDoc = await userRef.get();
+            
+            if (!userDoc.exists) {
+                alert('User data not found.');
+                return;
+            }
+
+            const userData = userDoc.data();
+            const isPremium = userData.plan === 'premium';
+            const credits = userData.credits || 0;
+
+            // For free users, check if they have enough credits
+            if (!isPremium && credits < 1) {
+                document.getElementById('credit-popup').style.display = 'block';
+                document.getElementById('popup-overlay').style.display = 'block';
+                return;
+            }
+
             const previewElement = document.getElementById(`${type}Preview`);
             previewElement.innerHTML = `
                 <div class="loading">
@@ -1498,6 +1657,25 @@
                         ${type === 'cv' ? processedDocs.cv : type === 'coverLetter' ? processedDocs.coverLetter : processedDocs.outreachEmail}
                     </div>
                 `;
+
+                // Deduct credits for regeneration if user is not premium
+                if (!isPremium) {
+                    try {
+                        await db.runTransaction(async (transaction) => {
+                            const sfDoc = await transaction.get(userRef);
+                            if (!sfDoc.exists) {
+                                throw "Document does not exist!";
+                            }
+                            const newCredits = sfDoc.data().credits - 1;
+                            transaction.update(userRef, { credits: newCredits });
+                        });
+                        console.log("Credits successfully deducted for regeneration!");
+                        loadUserData(userId); // Refresh credit display
+                    } catch (e) {
+                        console.log("Transaction failure: ", e);
+                        alert('Failed to deduct credits for regeneration. Please try again.');
+                    }
+                }
             } catch (error) {
                 console.error('Regeneration Error:', error);
                 previewElement.innerHTML = `
@@ -2889,6 +3067,33 @@ ${letterData.letter.signature}`;
                 return;
             }
 
+            const user = auth.currentUser;
+            if (!user) {
+                alert('User not logged in.');
+                return;
+            }
+
+            const userId = user.uid;
+            const userRef = db.collection('users').doc(userId);
+            
+            // Check user credits
+            const userDoc = await userRef.get();
+            if (!userDoc.exists) {
+                alert('User data not found.');
+                return;
+            }
+
+            const userData = userDoc.data();
+            const isPremium = userData.plan === 'premium';
+            let credits = userData.credits || 0;
+
+                // For free users, check if they have enough credits
+                if (!isPremium && credits < 1) {
+                    document.getElementById('credit-popup').style.display = 'block';
+                    document.getElementById('popup-overlay').style.display = 'block';
+                    return;
+                }
+
             const emailPanel = document.querySelector('.email-panel-content');
             const loadingOverlay = document.createElement('div');
             loadingOverlay.className = 'loading-overlay';
@@ -2899,6 +3104,32 @@ ${letterData.letter.signature}`;
             emailPanel.appendChild(loadingOverlay);
 
             try {
+                // Skip credit deduction and checks for premium users
+                if (isPremium) {
+                    console.log("Skipping credit check for premium user");
+                } else {
+                    try {
+                        // First check credit balance
+                        const doc = await userRef.get();
+                        if (!doc.exists) {
+                            alert('User data not found.');
+                            return;
+                        }
+
+                        const userData = doc.data();
+                        const currentCredits = userData.credits || 0;
+
+                        if (currentCredits < 1) {
+                            alert('Not enough credits. You need 1 credit to generate an email.');
+                            return;
+                        }
+                    } catch (e) {
+                        console.log("Transaction failure: ", e);
+                        alert('Failed to check credits. Please try again.');
+                        return;
+                    }
+                }
+
                 const response = await fetch(API_CONFIG.endpoint, {
                     method: 'POST',
                     headers: API_CONFIG.headers,
@@ -2930,6 +3161,23 @@ ${letterData.letter.signature}`;
 
                 const data = await response.json();
                 let emailData;
+
+                // Only deduct credits for free users after successful generation
+                if (isPremium) {
+                    console.log("Skipping credit deduction for premium user");
+                } else {
+                    await db.runTransaction(async (transaction) => {
+                        const sfDoc = await transaction.get(userRef);
+                        if (!sfDoc.exists) {
+                            throw "Document does not exist!";
+                        }
+                        const newCredits = sfDoc.data().credits - 1;
+                        transaction.update(userRef, { credits: newCredits });
+                    });
+
+                    console.log("Credits successfully deducted after generation!");
+                    loadUserData(userId); // Refresh credit display
+                }
                 
                 try {
                     // Clean and parse the response
@@ -2992,6 +3240,60 @@ ${letterData.letter.signature}`;
         }
 
         async function regenerateEmail() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('User not logged in.');
+                return;
+            }
+
+            const userId = user.uid;
+            const userRef = db.collection('users').doc(userId);
+            
+            // Check user plan
+            const userDoc = await userRef.get();
+            if (!userDoc.exists) {
+                alert('User data not found.');
+                return;
+            }
+
+            const userData = userDoc.data();
+            const isPremium = userData.plan === 'premium';
+
+            // Skip credit checks and deduction for premium users
+            if (isPremium) {
+                console.log("Skipping credit check/deduction for premium user");
+            } else {
+                // Check and deduct credits for free users
+                try {
+                    const currentCredits = userData.credits || 0;
+                    if (currentCredits < 1) {
+                        alert('Not enough credits. You need 1 credit to regenerate an email.');
+                        return;
+                    }
+
+                    // Deduct credit in a transaction
+                    await db.runTransaction(async (transaction) => {
+                        const sfDoc = await transaction.get(userRef);
+                        if (!sfDoc.exists) {
+                            throw "Document does not exist!";
+                        }
+                        const newCredits = sfDoc.data().credits - 1;
+                        if (newCredits < 0) {
+                            throw "Insufficient credits";
+                        }
+                        transaction.update(userRef, { credits: newCredits });
+                        console.log(`Deducted 1 credit (new balance: ${newCredits})`);
+                    });
+
+                    // Refresh credit display
+                    loadUserData(userId);
+                } catch (e) {
+                    console.log("Transaction failure: ", e);
+                    alert('Failed to deduct credit. Please try again.');
+                    return;
+                }
+            }
+
             // Clear out the existing content
             document.querySelector('.email-subject').value = '';
             document.querySelector('.email-body').textContent = '';
@@ -3022,6 +3324,32 @@ ${letterData.letter.signature}`;
 
             if (!cvContent && !coverLetterContent) {
                 alert('Please generate your CV and/or cover letter first');
+                return;
+            }
+
+            const user = auth.currentUser;
+            if (!user) {
+                alert('User not logged in.');
+                return;
+            }
+
+            const userId = user.uid;
+            
+            // Check user credits
+            const userDoc = await db.collection('users').doc(userId).get();
+            if (!userDoc.exists) {
+                alert('User data not found.');
+                return;
+            }
+
+            const userData = userDoc.data();
+            const isPremium = userData.plan === 'premium';
+            let credits = userData.credits || 0;
+
+            // For free users, check if they have enough credits
+            if (!isPremium && credits < 1) {
+                document.getElementById('credit-popup').style.display = 'block';
+                document.getElementById('popup-overlay').style.display = 'block';
                 return;
             }
 
@@ -3067,6 +3395,29 @@ ${letterData.letter.signature}`;
                 answerBox.textContent = data.choices[0].message.content.trim();
                 loadingOverlay.remove();
 
+                // Only deduct credits for free users
+                if (!isPremium) {
+                    const currentUser = auth.currentUser;
+                    if (currentUser) {
+                        const userId = currentUser.uid;
+                        const userRef = db.collection('users').doc(userId);
+                        try {
+                            await db.runTransaction(async (transaction) => {
+                                const sfDoc = await transaction.get(userRef);
+                                if (!sfDoc.exists) {
+                                    throw "Document does not exist!";
+                                }
+                                const newCredits = sfDoc.data().credits - 1;
+                                transaction.update(userRef, { credits: newCredits });
+                            });
+                            console.log("Credits successfully deducted for generating answer!");
+                            loadUserData(userId); // Refresh credit display
+                        } catch (e) {
+                            console.log("Transaction failure: ", e);
+                            alert('Failed to deduct credits for generating answer. Please try again.');
+                        }
+                    }
+                }
             } catch (error) {
                 console.error('Answer Generation Error:', error);
                 loadingOverlay.innerHTML = `
@@ -3077,11 +3428,12 @@ ${letterData.letter.signature}`;
                     </button>
                 `;
             }
-        }
+}
 
         async function regenerateAnswer() {
             const answerBox = document.querySelector('.answer-box');
             answerBox.textContent = '';
+
             await generateAnswer();
         }
 
@@ -3129,6 +3481,16 @@ ${letterData.letter.signature}`;
             const savedCVPreview = localStorage.getItem('savedCVPreview');
             if (savedCVPreview) {
                 document.getElementById('cvPreview').innerHTML = savedCVPreview;
+            }
+
+            // Load saved cover letter
+            const savedCoverLetter = localStorage.getItem('savedCoverLetter');
+            if (savedCoverLetter) {
+                document.getElementById('coverLetterPreview').innerHTML = `
+                    <div class="tailored-content">
+                        ${savedCoverLetter}
+                    </div>
+                `;
             }
 
             // Update file upload text if CV was previously selected
