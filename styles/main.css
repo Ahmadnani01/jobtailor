@@ -100,6 +100,7 @@ body {
 }
 
 .sidebar.collapsed .logo h2,
+.sidebar.collapsed .logo img,
 .sidebar.collapsed .nav-links li span {
     display: none;
 }
@@ -1400,4 +1401,12 @@ body {
     background-color: #d1d5db !important;
     transform: none;
     box-shadow: none;
+}
+
+.subscription-plan {
+    background-color: #8e44ad;
+}
+
+.subscription-plan:hover {
+    background-color: #773993;
 }
