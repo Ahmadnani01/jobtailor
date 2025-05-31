@@ -159,18 +159,19 @@
             <i class="fas fa-chevron-left"></i>
         </button>
         <div class="logo">
-            <h2>JobSeeker</h2>
+            <img src="tinywow_change_bg_photo_79922413 (1).png" alt="CVTailor.CC" style="width: 150px; height: auto;">
         </div>
         <ul class="nav-links">
-            <li onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>Home</span></li>
+            <li class="active" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>Home</span></li>
             <li onclick="window.location.href='marketplace.html'"><i class="fas fa-store"></i><span>Marketplace</span></li>
             <li onclick="window.location.href='region.html'"><i class="fas fa-globe"></i><span>Region</span></li>
             <li onclick="window.location.href='cv-section.html'"><i class="fas fa-file-alt"></i><span>CV & Cover Letter</span></li>
             <li onclick="window.location.href='job-board.html'"><i class="fas fa-briefcase"></i><span>Job Board</span></li>
-            <li><i class="fas fa-tasks"></i><span>Application Tracker</span></li>
-            <li class="active"><i class="fas fa-user"></i><span>Profile</span></li>
-            <li><i class="fas fa-comments"></i><span>Consultation</span></li>
+            <li><i class="fas fa-tasks"></i><span>Application Tracker <span style="color: grey;">(Coming Soon)</span></span></li>
+            <li onclick="window.location.href='profile.html'" ><i class="fas fa-user"></i><span>Profile</span></li>
+            <li><i class="fas fa-comments"></i><span>Consultation <span style="color: grey;">(Coming Soon)</span></span></li>
             <li onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></li>
+            <li onclick="window.location.href='plan.html'" class="subscription-plan"><i class="fas fa-credit-card"></i><span>Subscription Plan</span><span id="nav-credit-display" style="font-size: 0.8em; color: #fff; margin-left: 5px;">(Credit: Loading...)</span></li>
         </ul>
     </nav>
 
@@ -405,6 +406,9 @@
                                     <a href="${userData.cvUrl}" target="_blank">View Current CV</a>
                                 `;
                             }
+                            userCredits = userData.credits || 0; // Default to 0 if credits don't exist
+                            const currentPlan = userData.plan || 'free'; // Default to free if no plan exists
+                            updateCreditDisplayInButton(userCredits); // Update the button
                         }
                     })
                     .catch((error) => {
@@ -572,6 +576,27 @@
                 console.error('Error saving skills:', error);
                 alert('Failed to save skills');
             });
+        }
+
+        // Function to update credit display in the subscription button
+        async function updateCreditDisplayInButton(credits) {
+            const navCreditDisplay = document.getElementById('nav-credit-display');
+            if (navCreditDisplay) {
+                const user = auth.currentUser;
+                if (user) {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        const currentPlan = userData.plan || 'free';
+
+                        if (currentPlan === 'premium') {
+                            navCreditDisplay.textContent = 'Premium';
+                        } else {
+                            navCreditDisplay.textContent = `(Credit: ${credits})`;
+                        }
+                    }
+                }
+            }
         }
     </script>
 </body>
