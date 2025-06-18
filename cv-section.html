@@ -1177,10 +1177,7 @@
     </script>
 </head>
 <body>
-    <nav class="sidebar">
-        <button class="toggle-btn">
-            <i class="fas fa-chevron-left"></i>
-        </button>
+    <nav class="sidebar collapsed">
         <div class="logo">
             <img src="tinywow_change_bg_photo_79922413 (1).png" alt="CVTailor.CC Logo" style="width: 150px; height: auto;">
         </div>
@@ -1708,18 +1705,9 @@
                 .trim();
         }
 
-        // Add sidebar toggle functionality
-        const sidebar = document.querySelector('.sidebar');
+        // Initialize collapsed sidebar and expanded main content
         const mainContent = document.querySelector('.main-content');
-        const toggleBtn = document.querySelector('.toggle-btn');
-        const toggleIcon = toggleBtn.querySelector('i');
-
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-            toggleIcon.classList.toggle('fa-chevron-left');
-            toggleIcon.classList.toggle('fa-chevron-right');
-        });
+        mainContent.classList.add('expanded');
 
         // Maintain navigation functionality
         document.querySelector('li[onclick="window.location.href=\'index.html\'"]')
